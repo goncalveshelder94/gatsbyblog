@@ -77,16 +77,16 @@ def select_all_tasks(conn):
 Using our cursor variable `cur`, we execute a query where we fetch all emails from the `newsletter_subscription` table. If you ever use Microsoft Excel or the like you can easily visualise what emails could look like in a table named `newsletter_subscription`. We store the results on a variable named `result`.
 
 ```python
-    for email in result:
-        address = email
+for email in result:
+    address = email
 ```
 for each email (email is an implicitly created variable, no need to specify a type or prefix it with keywords like `var`, the wonders of python) in the query results, attribute that email to a new variable named `address`
 
 Creating the variable `address` to store the `email` is I'm sure, pointless, but since I ran into a couple hurdles while building this algorithm, this was the route I took to try to reverse engineer my own work as I worked through it (break things down). 
 
 ```python
-        url = "https://api.cleantalk.org/?method_name=spam_check&auth_key=xxxxxx&email={}"
-        target = url.format(*address)
+url = "https://api.cleantalk.org/?method_name=spam_check&auth_key=xxxxxx&email={}"
+target = url.format(*address)
 ```
 Next we create our url variable with our API address (Our Camilla on the other side who will provide us with rich information - given that we ask politely and that we know what we're asking) 
 
@@ -105,13 +105,13 @@ And so on for the 2413 email entries we previously had. This will be our `target
 ![factory line](https://media.giphy.com/media/oWQzTz2A4fp1m/giphy.gif)
 
 ```python
-        response = requests.get(target)
-        if(response.ok):
+response = requests.get(target)
+if(response.ok):
 ```
 requests is a Python library that makes HTTP requests (what you and I do when we go to google.com and search for our TV crushes. No need to feel guilty). For every `email` found in our `result` (our database) we'll request the URL above with that email appended in front. If the response is OK - see: [https://developer.mozilla.org/en-US/docs/Web/HTTP/Status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) we'll proceed to deal with the data we receive back.
 
 ```python
-            jsonData = json.loads(response.content)
+jsonData = json.loads(response.content)
 ```
 The response to our requests comes back in JSON notation [https://en.wikipedia.org/wiki/JSON](https://en.wikipedia.org/wiki/JSON)
 
@@ -136,20 +136,20 @@ The response to our requests comes back in JSON notation [https://en.wikipedia.o
 ```
 
 ```python
-            spamFrequency = jsonData["data"][str(*address).replace('+', ' ')]['frequency']
-            spamRate = jsonData["data"][str(*address).replace('+', ' ')]['spam_rate']
+spamFrequency = jsonData["data"][str(*address).replace('+', ' ')]['frequency']
+spamRate = jsonData["data"][str(*address).replace('+', ' ')]['spam_rate']
 ```
 Here we access and store the parameters that'll tell us whether an email has been flagged with spam activity or not. If the frequency or the spam_rate is bigger than 0 we don't want them in our mailing list.
 
 I had to add the `.replace()` function to replace occurrences with a plus sign with a space because the API would treat `+` as ` ` as it consumed the emails i.e. `john+doe@example.com` would come back as `john doe@example.com` and throw a KeyError error exception. Who knows why?
 
 ```python
-            if(spamFrequency > 0 and spamRate > 0):
-                print("Deleting spam flagged account:", *address)
-                cur.execute("DELETE FROM newsletter_subscription WHERE email = ?;", [*address])
+    if(spamFrequency > 0 and spamRate > 0):
+        print("Deleting spam flagged account:", *address)
+        cur.execute("DELETE FROM newsletter_subscription WHERE email = ?;", [*address])
                 
-        else:
-            response.raise_for_status()
+else:
+    response.raise_for_status()
 ```
 As mentioned before, if the `spamFrequency` and the `spamRate` are bigger than 0 then we execute a DELETE sql query to delete from the database table where email is equal to the email that was just passed and returned from the API.
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
 ```
 Program main block, basically, call Camilla, tell her what's up and get the entire conversation flowing.
 
-End result: We're down to **1495** subscriptions from **2413**.
+End result: We're down to **1495** subscriptions from **2413**, that's **918** spam flagged accounts gone.
 
 Full code snippet: https://gist.github.com/goncalveshelder94/9e18e4474cfdc7d59b5fae63c90847c9
 
