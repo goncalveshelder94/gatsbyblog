@@ -15,7 +15,9 @@ Why is this important? Unfortunately, my client's mailing list wasn't protected 
 
 **Consequences**
 
-This means, out of 2413 subscriptions, 1495 were tainted according to cleantalk.org. Due to this, our AWS Simple Email Service complaint rate percentile is at 0.44% just 0.06% shy of a possible sending service suspension.
+This means, out of 2413 subscriptions, a lot of them were tainted according to cleantalk.org. Due to this, our AWS Simple Email Service complaint rate percentile is at 0.44% just 0.06% shy of a possible sending service suspension.
+
+![Cleantalk spam report](./cleantalk_spam_report.jpg)
 
 # Solution
 
@@ -89,7 +91,7 @@ Creating the variable `address` to store the `email` is I'm sure, pointless, but
 Next we create our url variable with our API address (Our Camilla on the other side who will provide us with rich information - given that we ask politely and that we know what we're asking) 
 
 De-constructing the url:
-* `method_name`=spam_check (count the red cars for me, Camilla)
+* `method_name`=spam_check (count the red cars for me please, Camilla)
 * `auth_key`=xxxxx (purchasable from cleantalk.org, I paid £2.31 for 10.000 requests for a month duration - 10.000 exchanges of information) - these things cost money.
 * `email`={} (providing criteria for the spam_check which in this case are email addresses)
 
@@ -137,7 +139,7 @@ The response to our requests comes back in JSON notation [https://en.wikipedia.o
             spamFrequency = jsonData["data"][str(*address).replace('+', ' ')]['frequency']
             spamRate = jsonData["data"][str(*address).replace('+', ' ')]['spam_rate']
 ```
-Here we access and store tha parameters that'll tell us whether an email is flagged with spam activity or not. If the frequency or the spam_rate is bigger than 0 we don't want them in our mailing list.
+Here we access and store the parameters that'll tell us whether an email has been flagged with spam activity or not. If the frequency or the spam_rate is bigger than 0 we don't want them in our mailing list.
 
 I had to add the `.replace()` function to replace occurrences with a plus sign with a space because the API would treat `+` as ` ` as it consumed the emails i.e. `john+doe@example.com` would come back as `john doe@example.com` and throw a KeyError error exception. Who knows why?
 
@@ -172,6 +174,8 @@ if __name__ == '__main__':
 Program main block, basically, call Camilla, tell her what's up and get the entire conversation flowing.
 
 End result: We're down to **1495** subscriptions from **2413**.
+
+Full code snippet: https://gist.github.com/goncalveshelder94/9e18e4474cfdc7d59b5fae63c90847c9
 
 # Future considerations
 
