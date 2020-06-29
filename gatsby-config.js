@@ -5,7 +5,7 @@ module.exports = {
     description: `All things cyber.`,
     siteUrl: `https://gatsby-starter-blog-demo.netlify.com/`,
     social: {
-      twitter: `helderg94`,
+      twitter: `heldergee`,
     },
   },
   plugins: [
